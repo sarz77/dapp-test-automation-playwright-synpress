@@ -1,6 +1,10 @@
 import { test, expect } from "../fixtures/pomSynpressFixture";
 import * as metamask from "@synthetixio/synpress/commands/metamask";
-import { citizenData, expectedValues } from "../testData/dappDemoTestsData";
+import {
+  citizenData,
+  expectedValues,
+  citizenDataSimple,
+} from "../testData/dappDemoTestsData";
 
 test.describe("Dapp Demo Tests", () => {
   test.beforeEach(async ({ homePage }) => {
@@ -55,5 +59,64 @@ test.describe("Dapp Demo Tests", () => {
     await homePage.page.waitForSelector("[data-testid='citizenRow-1']");
     const totalCountAfter = await homePage.getTotalRecordsCount();
     expect(totalCountAfter).toBeGreaterThan(totalCountBefore);
+  });
+
+  test("Test ID - W3_2: Verify that the Citizen form with Missing Required Fileds is NOT submitted", async ({
+    homePage,
+    addCitizenPage,
+  }) => {
+    await homePage.btnAddCitizenHeader.click();
+    await addCitizenPage.btnAdd.click();
+    await expect(addCitizenPage.invalidAgeMessage).toBeVisible();
+    await expect(addCitizenPage.invalidAgeMessage.textContent()).resolves.toBe(
+      expectedValues.fieldRequiredMessage
+    );
+    await expect(addCitizenPage.invalidNameMessage.textContent()).resolves.toBe(
+      expectedValues.fieldRequiredMessage
+    );
+    await expect(addCitizenPage.invalidNoteMessage.textContent()).resolves.toBe(
+      expectedValues.fieldRequiredMessage
+    );
+    await expect(addCitizenPage.invalidCityMessage.textContent()).resolves.toBe(
+      expectedValues.fieldRequiredMessage
+    );
+  });
+
+  test("Test ID - W3_7: Verify that the error message is displayed when the user cancels the MetaMask transaction request and the citizen cound does NOT changed", async ({
+    homePage,
+    addCitizenPage,
+  }) => {
+    const totalCountBefore = await homePage.getTotalRecordsCount();
+    await homePage.btnAddCitizenHeader.click();
+    await addCitizenPage.rejectCitizen(citizenData);
+    await expect(addCitizenPage.msgCitizenAddRejected).toBeVisible({
+      timeout: 60000,
+    });
+    await homePage.navigate();
+    const totalCountAfter = await homePage.getTotalRecordsCount();
+    expect(totalCountAfter == totalCountBefore);
+  });
+
+  test("Test ID W3_1: Verify that the Citizen with Valid Data is added to the Citizens list", async ({
+    homePage,
+    addCitizenPage,
+  }) => {
+    const totalCountBefore = await homePage.getTotalRecordsCount();
+    const lastAddedCitizenData = await homePage.getLastAddedCitizenData();
+    await homePage.btnAddCitizenHeader.click();
+    await addCitizenPage.addCitizen(citizenDataSimple);
+    await expect(addCitizenPage.msgCitizenAddedSuccess).toBeVisible({
+      timeout: 60000,
+    });
+    await homePage.navigate();
+    await homePage.page.waitForSelector("[data-testid='citizenRow-1']");
+    const totalCountAfter = await homePage.getTotalRecordsCount();
+    expect(totalCountAfter).toBeGreaterThan(totalCountBefore);
+    const newAddedCitizenData = await homePage.getLastAddedCitizenData();
+    expect(lastAddedCitizenData.id).toBe(newAddedCitizenData.id - 1);
+    expect(citizenDataSimple.name).toBe(newAddedCitizenData.name);
+    expect(citizenDataSimple.age).toBe(newAddedCitizenData.age);
+    expect(citizenDataSimple.city).toBe(newAddedCitizenData.city);
+    expect(citizenDataSimple.note).toBe(newAddedCitizenData.note);
   });
 });

@@ -3,11 +3,19 @@ export const expectedValues = {
     "Please, connect your wallet and switch to Sepolia test network to load citizens list and add new citizens",
   addCitizenButtonTextExpected: "Add Citizen",
   connectButtonTextExpected: "Connect",
+  fieldRequiredMessage: "This field is required",
 };
 
 export const citizenData = {
   name: `Test ${Date.now()}`,
   age: 24,
-  city: 'Yerevan',
-  note: 'This is a test citizen created by Playwright and Synpress test automation'
+  city: "Yerevan",
+  note: "This is a test citizen created by Playwright and Synpress test automation",
+};
+
+export const citizenDataSimple = {
+  name: `Test123`,
+  age: 24,
+  city: "Yerevan",
+  note: "This is a test citizen created by Playwright and Synpress test automation",
 };
